@@ -1,0 +1,80 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-redis-env
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dev-redis-env
+  template:
+    metadata:
+      labels:
+        app: dev-redis-env
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: node-dev
+      hostAliases:
+      - ip: "172.31.17.24"
+        hostnames:
+          - "lb.kubesphere.local"
+      containers:
+      - image: djangoyi/k8s-dev-ubuntu:go1.21.5
+        imagePullPolicy: Always
+        name: ubuntu
+        command: ["sh", "-c", "service ssh start;while :; do sleep 10;done"]
+        volumeMounts:
+        - name: data-redis-operator
+          mountPath: /root/Redis-operator
+        - name: data-authorized-keys
+          mountPath: /root/.ssh/authorized_keys
+        - name: data-vscode-server
+          mountPath: /root/.vscode-server
+        - name: data-go-path
+          mountPath: /root/go
+        - name: data-k8s-auth-path
+          mountPath: /root/.kube
+      volumes:
+      - name: data-redis-operator
+        hostPath:
+          path: /codeplace/Redis-operator
+          type: Directory
+      - name: data-authorized-keys
+        hostPath:
+          path: /root/.ssh/authorized_keys
+          type: File
+      - name: data-vscode-server
+        hostPath:
+          path: /codeplace/k8s-dev/redis/vscode-server
+          type: Directory
+      - name: data-go-path
+        hostPath:
+          path: /codeplace/k8s-dev/redis/go
+          type: Directory
+      - name: data-k8s-auth-path
+        hostPath:
+          path: /root/.kube
+          type: Directory
+      tolerations:
+      - key: app
+        operator: Equal
+        value: dev
+        effect: NoSchedule
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-redis-env-service
+  namespace: default
+spec:
+  selector:
+    app: dev-redis-env
+  ports:
+    - protocol: TCP
+      port: 22
+      targetPort: 22
+      nodePort: 30022
+  type: NodePort
