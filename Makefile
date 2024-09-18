@@ -7,3 +7,15 @@ default:
 
 test: default
 	docker push $(NAMESPACE)/$(IMAGE):go$(GOVERSION)
+
+start-dmp:
+	kubectl apply -f dmp/dev-dmp.yaml
+
+remove-dmp:
+	kubectl delete -f dmp/dev-dmp.yaml
+
+install-pg:
+	helm upgrade pg-dmp bitnami/postgresql -f dmp/pg-values.yaml --install
+
+remove-pg:
+	helm uninstall pg-dmp
