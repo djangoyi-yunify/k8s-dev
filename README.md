@@ -6,3 +6,9 @@ kubectl taint nodes node-dev app=dev:NoSchedule
 ```
 kubectl taint nodes node-dev app:NoSchedule-
 ```
+
+### 设置 helm repo
+#### bitnami
+```
+helm repo add bitnami https://charts.bitnami.com/bitnami
+```
