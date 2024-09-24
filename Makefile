@@ -8,7 +8,7 @@ default:
 test: default
 	docker push $(NAMESPACE)/$(IMAGE):go$(GOVERSION)
 
-start-dmp:
+start-dmp: remove-redis
 	kubectl apply -f dmp/dev-dmp.yaml
 
 remove-dmp:
@@ -19,3 +19,9 @@ install-pg:
 
 remove-pg:
 	helm uninstall pg-dmp
+
+start-redis: remove-dmp
+	kubectl apply -f redis/dev-redis.yaml
+
+remove-redis:
+	kubectl delete -f redis/dev-redis.yaml
